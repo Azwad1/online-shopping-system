@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Free Shop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef5ff;
+      padding: 20px;
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: #fff;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    button {
+      padding: 6px 12px;
+      margin-left: 10px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #cart {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🛒 Product List</h2>
+  <ul id="productList"></ul>
+
+  <div id="cart">
+    <h3>🧺 Your Cart</h3>
+    <ul id="cartList"></ul>
+    <p><strong>Total: ₹<span id="total">0</span></strong></p>
+    <button onclick="buyItems()">Buy</button>
+  </div>
+
+  <script>
+    let cart = [];
+
+    function loadProducts() {
+      fetch("http://localhost:8080/products")
+        .then(res => res.json())
+        .then(data => {
+          let list = document.getElementById("productList");
+          list.innerHTML = "";
+          data.forEach(p => {
+            let item = document.createElement("li");
+            item.innerHTML = `${p.name} - ₹${p.price} 
+              <button onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>`;
+            list.appendChild(item);
+          });
+        });
+    }
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCart();
+    }
+
+    function updateCart() {
+      let cartList = document.getElementById("cartList");
+      let total = 0;
+      cartList.innerHTML = "";
+      cart.forEach(item => {
+        total += item.price;
+        let li = document.createElement("li");
+        li.innerText = `${item.name} - ₹${item.price}`;
+        cartList.appendChild(li);
+      });
+      document.getElementById("total").innerText = total;
+    }
+
+    function buyItems() {
+      if (cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+      }
+      alert("Thank you for your purchase!");
+      cart = [];
+      updateCart();
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>

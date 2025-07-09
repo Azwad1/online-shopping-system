@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #444;
+    }
+
+    input {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 14px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #27ae60;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: #ffffff;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    .edit-btn {
+      background-color: #f39c12;
+      margin-left: 10px;
+    }
+
+    .edit-btn:hover {
+      background-color: #d68910;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      margin-left: 5px;
+    }
+
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <h2>🛠 Admin Product Manager</h2>
+
+  <input type="text" id="name" placeholder="Product Name">
+  <input type="number" id="price" placeholder="Price">
+  <button onclick="addProduct()">Add Product</button>
+
+  <ul id="adminList"></ul>
+
+  <script>
+    function loadProducts() {
+      fetch("http://localhost:8080/products")
+        .then(res => res.json())
+        .then(data => {
+          let list = document.getElementById("adminList");
+          list.innerHTML = "";
+          data.forEach(p => {
+            let item = document.createElement("li");
+            item.innerHTML = `${p.name} - ₹${p.price} 
+              <button class="edit-btn" onclick="editProduct(${p.id}, '${p.name}', ${p.price})">Edit</button>
+              <button class="delete-btn" onclick="deleteProduct(${p.id})">Delete</button>`;
+            list.appendChild(item);
+          });
+        });
+    }
+
+    function addProduct() {
+      let name = document.getElementById("name").value;
+      let price = document.getElementById("price").value;
+
+      fetch("http://localhost:8080/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, price: price })
+      }).then(() => {
+        loadProducts();
+        document.getElementById("name").value = "";
+        document.getElementById("price").value = "";
+      });
+    }
+
+    function deleteProduct(id) {
+      fetch(`http://localhost:8080/products/${id}`, {
+        method: "DELETE"
+      }).then(() => loadProducts());
+    }
+
+    function editProduct(id, oldName, oldPrice) {
+      let newName = prompt("Edit Name:", oldName);
+      let newPrice = prompt("Edit Price:", oldPrice);
+
+      fetch(`http://localhost:8080/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, price: newPrice })
+      }).then(() => loadProducts());
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
